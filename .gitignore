@@ -1,0 +1,6 @@
+obj/
+mono/
+bin/
+
+*.sln
+appsettings.*
