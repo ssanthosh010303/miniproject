@@ -10,9 +10,10 @@ namespace WebApi.Controllers;
 
 [Route("/api/jwt")]
 [ApiController]
-public class JwtController(IJwtService service) : ControllerBase
+public class JwtController(IJwtService service, ILogger<JwtController> logger) : ControllerBase
 {
     private readonly IJwtService _service = service;
+    private readonly ILogger<JwtController> _logger = logger;
 
     [HttpGet]
     [Authorize(AuthenticationSchemes = "Basic")]
@@ -26,6 +27,8 @@ public class JwtController(IJwtService service) : ControllerBase
             var role = User.FindFirstValue(ClaimTypes.Role)
                 ?? throw new AuthenticationFailureException("Role not found in JWT.");
 
+            _logger.LogInformation("Generating a new JWT token.");
+
             return Ok(new JwtGetDto
             {
                 Token = _service.GenerateToken(username, role)
@@ -33,6 +36,7 @@ public class JwtController(IJwtService service) : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to generate a new JWT token.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,

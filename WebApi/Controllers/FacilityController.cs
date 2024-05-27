@@ -13,10 +13,12 @@ namespace WebApi.Controllers;
 public class FacilityController : ControllerBase
 {
     private readonly IFacilityService _service;
+    private readonly ILogger<FacilityController> _logger;
 
-    public FacilityController(IFacilityService service)
+    public FacilityController(IFacilityService service, ILogger<FacilityController> logger)
     {
         _service = service;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -29,10 +31,12 @@ public class FacilityController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("Adding a new facility.");
             return Ok(await _service.Add(dtoEntity));
         }
         catch (ServiceValidationException ex)
         {
+            _logger.LogError(ex, "Validation failed while adding a new facility.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,
@@ -41,6 +45,7 @@ public class FacilityController : ControllerBase
         }
         catch (ServiceException ex)
         {
+            _logger.LogError(ex, "Failed to add a new facility.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,
@@ -51,19 +56,21 @@ public class FacilityController : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete([FromRoute] int id)
     {
         try
         {
+            _logger.LogInformation("Deleting a facility.");
             await _service.Delete(id);
             return NoContent();
         }
         catch (ServiceException ex)
         {
+            _logger.LogError(ex, "Failed to delete a facility.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,
@@ -80,10 +87,12 @@ public class FacilityController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("Fetching all facilities.");
             return Ok(await _service.GetAll());
         }
         catch (ServiceException ex)
         {
+            _logger.LogError(ex, "Failed to fetch all facilities.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,
@@ -100,10 +109,12 @@ public class FacilityController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("Fetching a facility by ID.");
             return Ok(await _service.GetById(id));
         }
         catch (ServiceException ex)
         {
+            _logger.LogError(ex, "Failed to fetch a facility by ID.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,
@@ -122,10 +133,12 @@ public class FacilityController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("Updating a facility.");
             return Ok(await _service.Update(id, dtoEntity));
         }
         catch (ServiceValidationException ex)
         {
+            _logger.LogError(ex, "Validation failed while updating a facility.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,
@@ -134,6 +147,7 @@ public class FacilityController : ControllerBase
         }
         catch (ServiceException ex)
         {
+            _logger.LogError(ex, "Failed to update a facility.");
             return BadRequest(new ErrorResponseDto
             {
                 Message = ex.Message,
