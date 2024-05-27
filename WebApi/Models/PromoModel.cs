@@ -17,6 +17,14 @@ public class Promo : BaseModel
     [Range(0, 100, ErrorMessage = "Discount percent must be between 0 and 100.")]
     public int DiscountPercent { get; set; }
 
+    [Required(ErrorMessage = "Minimum purchase is required.")]
+    [Range(0, 500.0, ErrorMessage = "Minimum purchase must be a positive number.")]
+    public double MinimumPurchase { get; set;}
+
+    [Required(ErrorMessage = "Allowed payment method is required.")]
+    [EnumDataType(typeof(PaymentMethod), ErrorMessage = "Invalid payment method.")]
+    public PaymentMethod AllowedPaymentMethod { get; set; }
+
     [Required(ErrorMessage = "Valid from date is required.")]
     [DataType(DataType.Date)]
     public DateTime ValidFrom { get; set; }

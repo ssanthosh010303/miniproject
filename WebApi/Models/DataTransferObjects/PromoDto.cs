@@ -30,6 +30,14 @@ public class PromoAddUpdateDto : BaseAddUpdateDto
     [Range(0, 100, ErrorMessage = "Discount percent must be between 0 and 100.")]
     public int DiscountPercent { get; set; }
 
+    [Required(ErrorMessage = "Minimum purchase is required.")]
+    [Range(0, 500.0, ErrorMessage = "Minimum purchase must be a positive number.")]
+    public double MinimumPurchase { get; set;}
+
+    [Required(ErrorMessage = "Allowed payment method is required.")]
+    [EnumDataType(typeof(PaymentMethod), ErrorMessage = "Invalid payment method.")]
+    public PaymentMethod AllowedPaymentMethod { get; set; }
+
     [Required(ErrorMessage = "Valid from date is required.")]
     [DataType(DataType.Date)]
     public DateTime ValidFrom { get; set; }
@@ -43,6 +51,8 @@ public class PromoAddUpdateDto : BaseAddUpdateDto
         entity.Code = Code;
         entity.Description = Description;
         entity.DiscountPercent = DiscountPercent;
+        entity.MinimumPurchase = MinimumPurchase;
+        entity.AllowedPaymentMethod = AllowedPaymentMethod;
         entity.ValidFrom = ValidFrom;
         entity.ValidTo = ValidTo;
 
@@ -58,6 +68,10 @@ public class PromoGetDto : BaseGetDto
 
     public int DiscountPercent { get; set; }
 
+    public double MinimumPurchase { get; set;}
+
+    public PaymentMethod AllowedPaymentMethod { get; set; }
+
     public DateTime ValidFrom { get; set; }
 
     public DateTime ValidTo { get; set; }
@@ -72,6 +86,8 @@ public class PromoGetDto : BaseGetDto
         Code = entity.Code;
         Description = entity.Description;
         DiscountPercent = entity.DiscountPercent;
+        MinimumPurchase = entity.MinimumPurchase;
+        AllowedPaymentMethod = entity.AllowedPaymentMethod;
         ValidFrom = entity.ValidFrom;
         ValidTo = entity.ValidTo;
 

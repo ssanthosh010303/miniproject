@@ -8,29 +8,21 @@ namespace WebApi.Services;
 
 public interface IEmailService
 {
-    Task SendEmailAsync(string recipientEmail, string filename);
+    Task SendEmailAsync(string recipientEmail, string subject, string body);
 }
 
-public class EmailService(
-    IConfiguration appConfiguration, IWebHostEnvironment environment)
+public class EmailService(IConfiguration appConfiguration)
     : IEmailService
 {
-    private readonly string _baseDirectory = environment.ContentRootPath;
     private readonly string _senderEmail = appConfiguration["EmailSettings:SenderEmail"];
     private readonly string _senderPassword = appConfiguration["EmailSettings:SenderPassword"];
     private readonly string _smtpServer = appConfiguration["EmailSettings:SmtpServer"];
     private readonly int _smtpPort = appConfiguration.GetValue<int>("EmailSettings:SmtpPort");
 
-    public async Task SendEmailAsync(string recipientEmail, string filename)
+    public async Task SendEmailAsync(string recipientEmail, string subject, string body)
     {
         try
         {
-            string subjectFilePath = Path.Combine(_baseDirectory, $"{filename}.subject");
-            string bodyFilePath = Path.Combine(_baseDirectory, $"{filename}.body");
-
-            string subject = await File.ReadAllTextAsync(subjectFilePath);
-            string body = await File.ReadAllTextAsync(bodyFilePath);
-
             using MailMessage mail = new(_senderEmail, recipientEmail);
             using SmtpClient smtpClient = new(_smtpServer, _smtpPort);
 

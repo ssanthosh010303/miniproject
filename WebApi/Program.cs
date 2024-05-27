@@ -27,6 +27,7 @@ public class Program
             ));
         });
         ConfigureDependencyInjectionContainer(builder.Services);
+        builder.Services.AddLogging();
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();

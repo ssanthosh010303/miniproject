@@ -107,4 +107,25 @@ public class PaymentController : ControllerBase
             });
         }
     }
+
+    [HttpPost("/wbh-complete")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> WebhookComplete([FromBody] PaymentSuccessDto dtoEntity)
+    {
+        try
+        {
+            await _service.PaymentSuccessUpdate(dtoEntity);
+            return NoContent();
+        }
+        catch (ServiceException ex)
+        {
+            return BadRequest(new ErrorResponseDto
+            {
+                Message = ex.Message,
+                ErrorCode = "UpdateError"
+            });
+        }
+    }
 }

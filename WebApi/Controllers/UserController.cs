@@ -135,4 +135,22 @@ public class UserController : ControllerBase
             });
         }
     }
+
+    [HttpGet("/verify/{jwt}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Verify([FromRoute] string jwt)
+    {
+        try
+        {
+            return Ok(await _service.ValidateToken(jwt));
+        }
+        catch (ServiceException ex)
+        {
+            return BadRequest(new ErrorResponseDto
+            {
+                Message = ex.Message,
+                ErrorCode = "VerificationFailed"
+            });
+        }
+    }
 }

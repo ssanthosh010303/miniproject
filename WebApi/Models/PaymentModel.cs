@@ -38,7 +38,7 @@ public class Payment : BaseModel
 
     [Required(ErrorMessage = "Amount paid is a required field.")]
     [Range(0, 10000.0, ErrorMessage = "Amount paid must be between 0 and 10000.")]
-    public double AmountPaid { get; set; }
+    public double AmountPaid { get; set; } = 0;
 
     public int? PromoId { get; set; }
     public Promo Promo { get; set; }

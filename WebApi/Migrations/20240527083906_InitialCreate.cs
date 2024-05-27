@@ -107,6 +107,8 @@ namespace WebApi.Migrations
                     Description = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DiscountPercent = table.Column<int>(type: "int", nullable: false),
+                    MinimumPurchase = table.Column<double>(type: "double", nullable: false),
+                    AllowedPaymentMethod = table.Column<int>(type: "int", nullable: false),
                     ValidFrom = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ValidTo = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -325,7 +327,7 @@ namespace WebApi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Payment",
+                name: "Payments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -342,14 +344,14 @@ namespace WebApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payment", x => x.Id);
+                    table.PrimaryKey("PK_Payments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Payment_Promos_PromoId",
+                        name: "FK_Payments_Promos_PromoId",
                         column: x => x.PromoId,
                         principalTable: "Promos",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Payment_Users_PayerId",
+                        name: "FK_Payments_Users_PayerId",
                         column: x => x.PayerId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -452,9 +454,9 @@ namespace WebApi.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Tickets_Payment_PaymentId",
+                        name: "FK_Tickets_Payments_PaymentId",
                         column: x => x.PaymentId,
-                        principalTable: "Payment",
+                        principalTable: "Payments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -499,13 +501,13 @@ namespace WebApi.Migrations
                 column: "TheatersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_PayerId",
-                table: "Payment",
+                name: "IX_Payments_PayerId",
+                table: "Payments",
                 column: "PayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_PromoId",
-                table: "Payment",
+                name: "IX_Payments_PromoId",
+                table: "Payments",
                 column: "PromoId");
 
             migrationBuilder.CreateIndex(
@@ -615,7 +617,7 @@ namespace WebApi.Migrations
                 name: "MovieShows");
 
             migrationBuilder.DropTable(
-                name: "Payment");
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "Screens");

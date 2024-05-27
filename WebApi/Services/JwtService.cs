@@ -8,6 +8,7 @@ namespace WebApi.Services;
 public interface IJwtService
 {
     string GenerateToken(string username, string role);
+    string ValidateToken(string jwt);
 }
 
 public class JwtService(IConfiguration configuration) : IJwtService
@@ -38,5 +39,24 @@ public class JwtService(IConfiguration configuration) : IJwtService
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string ValidateToken(string jwt)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_secretKey);
+
+        tokenHandler.ValidateToken(jwt, new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _issuer,
+            ValidAudience = _audience,
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        }, out SecurityToken validatedToken);
+
+         return tokenHandler.ReadJwtToken(jwt).Subject;
     }
 }

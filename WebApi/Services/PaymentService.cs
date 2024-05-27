@@ -11,6 +11,7 @@ namespace WebApi.Services;
 public interface IPaymentService
 {
     public Task<PaymentAddDto> AddPendingPayment(PaymentAddDto entity, string payerId);
+    public Task PaymentSuccessUpdate(PaymentSuccessDto dtoEntity);
     public Task Delete(int id);
     public Task<ICollection<PaymentListDto>> GetAll();
     public Task<PaymentGetDto> GetById(int id);
@@ -20,13 +21,17 @@ public class PaymentService(
     IBaseRepository<Payment> repository,
     IBaseRepository<Ticket> ticketRepository,
     IBaseRepository<User> userRepository,
-    ISeatRepository seatRepository)
+    IBaseRepository<Promo> promoRepository,
+    ISeatRepository seatRepository,
+    IEmailService emailService)
     : IPaymentService
 {
     private readonly IBaseRepository<Payment> _repository = repository;
     private readonly IBaseRepository<Ticket> _ticketRepository = ticketRepository;
+    private readonly IBaseRepository<Promo> _promoRepository = promoRepository;
     private readonly IBaseRepository<User> _userRepository = userRepository;
     private readonly ISeatRepository _seatRepository = seatRepository;
+    private readonly IEmailService _emailService = emailService;
 
     public async Task<PaymentAddDto> AddPendingPayment(
         PaymentAddDto dtoEntity, string payerUsername)
@@ -38,16 +43,37 @@ public class PaymentService(
                 .Select(entity => entity.Id)
                 .FirstAsync();
             var payment = dtoEntity.CopyTo(new Payment());
-
             var seatIds = dtoEntity.SeatsBooked.Split(',');
 
             foreach (var seatId in seatIds)
             {
-                var seat = await _seatRepository.GetById(
-                    dtoEntity.TheaterId, dtoEntity.ScreenId, seatId);
+                var seat = await _seatRepository.GetDbSet()
+                    .Where(entity =>
+                        entity.TheaterId == dtoEntity.TheaterId &&
+                        entity.ScreenId == dtoEntity.ScreenId &&
+                        entity.Id == seatId)
+                    .Include(entity => entity.SeatType)
+                    .FirstAsync();
+
+                payment.AmountPaid += seat.SeatType.Price;
 
                 seat.ShowId = dtoEntity.MovieShowId;
                 await _seatRepository.Update(seat);
+            }
+
+            if (dtoEntity.PromoId != 0)
+            {
+                var promoEntity = await _promoRepository.GetDbSet()
+                    .FindAsync(dtoEntity.PromoId);
+
+                if (promoEntity != null
+                    && DateTime.Today <= promoEntity.ValidTo.Date
+                    && dtoEntity.Method == promoEntity.AllowedPaymentMethod
+                    && payment.AmountPaid >= promoEntity.MinimumPurchase)
+                {
+                    payment.AmountPaid -= payment.AmountPaid * promoEntity.DiscountPercent / 100;
+                    payment.PromoId = promoEntity.Id;
+                }
             }
 
             payment.PayerId = userId;
@@ -69,18 +95,44 @@ public class PaymentService(
         }
     }
 
-    public async Task PaymentSuccessUpdate(int id)
+    public async Task PaymentSuccessUpdate(PaymentSuccessDto dtoEntity)
     {
         try
         {
             var payment = await _repository.GetDbSet()
-                .Where(entity => entity.Id == id)
+                .Where(entity => entity.Id == dtoEntity.UserId)
                 .Include(entity => entity.Promo)
                 .FirstAsync();
 
-            payment.Status = PaymentStatus.Success;
+            // if (payment.Status == PaymentStatus.Success)
+            //     throw new ServiceException("Payment already successful.");
 
-            // Create Ticket, Mail User with Ticket, Delete Ticket Flush Job
+            var user = await _userRepository.GetDbSet()
+                .FindAsync(dtoEntity.UserId)
+                ?? throw new InvalidOperationException("User not found.");
+            var ticket = dtoEntity.CopyTo(new Ticket());
+
+            payment.Status = PaymentStatus.Success;
+            await _ticketRepository.Add(ticket);
+
+            ticket = await _ticketRepository.GetDbSet()
+                .Where(entity => entity.PaymentId == payment.Id)
+                .Include(entity => entity.Theater)
+                .Include(entity => entity.Screen)
+                .Include(entity => entity.MovieShow)
+                .ThenInclude(entity => entity.Movie)
+                .FirstAsync() ?? throw new ServiceException("Ticket not found.");
+
+            // Send Email
+            await _emailService.SendEmailAsync(user.Email, $"Payment Successful, {user.FullName}",
+                "Your payment was successful. Here are your ticket details:\n\n"
+                + $"Paid Amount: {payment.AmountPaid}\n"
+                + $"Screen: {ticket.Screen.Name}\n"
+                + $"Theater: {ticket.Theater.Name}\n"
+                + $"Movie Name: {ticket.MovieShow.Movie.Name}\n"
+                + $"Show Time: {ticket.MovieShow.ShowTime}\n"
+                + $"Seats Booked: {ticket.SeatsBooked}\n\n"
+                + "With Regards,\nThe Movie Booking Team");
 
             await _repository.Update(payment);
         }

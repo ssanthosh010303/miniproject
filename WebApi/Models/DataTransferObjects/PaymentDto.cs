@@ -28,16 +28,8 @@ public class PaymentAddDto : BaseAddUpdateDto
     [EnumDataType(typeof(PaymentMethod))]
     public PaymentMethod Method { get; set; }
 
-    [Required(ErrorMessage = "Payment status is a required field.")]
-    [EnumDataType(typeof(PaymentStatus))]
-    public PaymentStatus Status { get; set; }
-
-    [Required(ErrorMessage = "Amount paid is a required field.")]
-    [Range(0, 10000.0, ErrorMessage = "Amount paid must be between 0 and 10000.")]
-    public double AmountPaid { get; set; }
-
     [Required(ErrorMessage = "Booked seats is a required field.")]
-    [RegularExpression(@"^[A-Za-z]\d{2}(,[A-Za-z]\d{2})*$",
+    [RegularExpression(@"^[A-Za-z]\d{1,2}(,[A-Za-z]\d{1,2})*$",
         ErrorMessage = "Invalid seats format. Seats should be in the format \"AXX,BYY\".")]
     public string SeatsBooked { get; set; }
 
@@ -56,9 +48,40 @@ public class PaymentAddDto : BaseAddUpdateDto
     {
         entity.Date = Date;
         entity.Method = Method;
-        entity.Status = Status;
-        entity.AmountPaid = AmountPaid;
         entity.PromoId = PromoId;
+
+        return entity;
+    }
+}
+
+public class PaymentSuccessDto : BaseDto
+{
+    [Required(ErrorMessage = "Movie show ID is a required field.")]
+    public int MovieShowId { get; set; }
+
+    [Required(ErrorMessage = "Yser ID is a required field.")]
+    public int UserId { get; set; }
+
+    [Required(ErrorMessage = "Payment ID is a required field.")]
+    public int PaymentId { get; set; }
+
+    [Required(ErrorMessage = "Theater ID is a required field.")]
+    public int TheaterId { get; set; }
+
+    [Required(ErrorMessage = "Screen number is a required field.")]
+    public int ScreenId { get; set; }
+
+    [Required(ErrorMessage = "Booked seats is a required field.")]
+    public string SeatsBooked { get; set; }
+
+    public Ticket CopyTo(Ticket entity)
+    {
+        entity.MovieShowId = MovieShowId;
+        entity.UserId = UserId;
+        entity.PaymentId = PaymentId;
+        entity.TheaterId = TheaterId;
+        entity.ScreenId = ScreenId;
+        entity.SeatsBooked = SeatsBooked;
 
         return entity;
     }

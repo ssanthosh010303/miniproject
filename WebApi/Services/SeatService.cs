@@ -16,10 +16,11 @@ public interface ISeatService
     public Task<SeatGetDto> GetById(int theaterId, int screenId, string seatId);
 }
 
-public class SeatService(ISeatRepository repository)
+public class SeatService(ISeatRepository repository, IBaseRepository<Screen> screenRepository)
     : ISeatService
 {
     private readonly ISeatRepository _repository = repository;
+    private readonly IBaseRepository<Screen> _screenRepository = screenRepository;
 
     public async Task<SeatAddUpdateDto> Add(SeatAddUpdateDto entity)
     {
@@ -33,6 +34,12 @@ public class SeatService(ISeatRepository repository)
                 char endChar = char.ToUpper(seatSchema.RowRange[2]);
                 var screenId = seatSchema.ScreenId;
                 var seatTypeId = seatSchema.SeatTypeId;
+
+                var screen = await _screenRepository.GetById(screenId);
+
+                if (screen.TheaterId != theaterId)
+                    throw new ServiceException(
+                        "The screen ID provided does not belong to the theater ID provided.");
 
                 for (char c = startChar; c <= endChar; c++)
                 {

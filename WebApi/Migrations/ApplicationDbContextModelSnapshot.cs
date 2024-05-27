@@ -277,7 +277,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("PromoId");
 
-                    b.ToTable("Payment");
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("WebApi.Models.Promo", b =>
@@ -287,6 +287,9 @@ namespace WebApi.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AllowedPaymentMethod")
+                        .HasColumnType("int");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -305,6 +308,9 @@ namespace WebApi.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<double>("MinimumPurchase")
+                        .HasColumnType("double");
 
                     b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("datetime(6)");

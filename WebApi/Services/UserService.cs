@@ -17,14 +17,20 @@ public interface IUserService
     public Task<User> Update(int id, UserUpdateDto entity);
 
     public Task<User> ValidateUser(string username, string password);
+    public Task<User> ValidateToken(string jwt);
 }
 
 public class UserService(
-    IBaseRepository<User> repository, ICryptographyService cryptographyService)
+    IBaseRepository<User> repository,
+    ICryptographyService cryptographyService,
+    IEmailService emailService,
+    IJwtService jwtService)
     : IUserService
 {
     private readonly IBaseRepository<User> _repository = repository;
     private readonly ICryptographyService _cryptographyService = cryptographyService;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IJwtService _jwtService = jwtService;
 
     public async Task<UserGetDto> Add(UserAddDto entity)
     {
@@ -34,6 +40,14 @@ public class UserService(
 
             newUser.PasswordHash = _cryptographyService.HashPassword(
                 newUser.PasswordHash);
+            await _emailService.SendEmailAsync(
+                newUser.Email,
+                "Welcome to Movie Booking System!",
+                "You have successfully registered. Kindly verify your email by"
+                +" clicking on the link provided in the email.\n\n"
+                + $"Email Activation Link: http://4.240.98.131:5064/api/user/verify/{_jwtService.GenerateToken(newUser.Username, "Admin")}\n\n"
+                + "With Regards,\nThe Movie Booking Team\n"
+            );
             return new UserGetDto().CopyFrom(await _repository.Add(newUser));
         }
         catch (RepositoryException ex)
@@ -142,6 +156,33 @@ public class UserService(
         {
             throw new ServiceException(
                 "An error occurred in the service while validating the user.",
+                ex);
+        }
+        catch (InvalidOperationException)
+        {
+            throw new ServiceException("The user does not exist.");
+        }
+    }
+
+    public async Task<User> ValidateToken(string jwt)
+    {
+        try
+        {
+            var username = _jwtService.ValidateToken(jwt);
+
+            Console.WriteLine("JWT validated successfully!");
+            var user = await _repository.GetDbSet()
+                .Where(entity => entity.Username == username)
+                .FirstAsync();
+
+            user.IsActive = true;
+
+            return await _repository.Update(user);
+        }
+        catch (RepositoryException ex)
+        {
+            throw new ServiceException(
+                "An error occurred in the service while verifying the user.",
                 ex);
         }
         catch (InvalidOperationException)
