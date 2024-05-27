@@ -23,25 +23,26 @@ public enum PaymentStatus
 
 public class Payment : BaseModel
 {
-    [Required(ErrorMessage = "Amount is a required field.")]
-    [Column(TypeName = "decimal(18, 2)")]
-    public decimal Amount { get; set; }
 
     [Required(ErrorMessage = "Payment date is a required field.")]
     [DataType(DataType.Date)]
-    public DateTime PaymentDate { get; set; }
+    public DateTime Date { get; set; }
 
     [Required(ErrorMessage = "Payment method is a required field.")]
     [EnumDataType(typeof(PaymentMethod))]
-    public PaymentMethod PaymentMethod { get; set; }
+    public PaymentMethod Method { get; set; }
 
     [Required(ErrorMessage = "Payment status is a required field.")]
     [EnumDataType(typeof(PaymentStatus))]
-    public PaymentStatus PaymentStatus { get; set; }
+    public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
+
+    [Required(ErrorMessage = "Amount paid is a required field.")]
+    [Range(0, 10000.0, ErrorMessage = "Amount paid must be between 0 and 10000.")]
+    public double AmountPaid { get; set; }
 
     public int? PromoId { get; set; }
     public Promo Promo { get; set; }
 
-    public int UserId { get; set; }
-    public User User { get; set; }
+    public int PayerId { get; set; }
+    public User Payer { get; set; }
 }

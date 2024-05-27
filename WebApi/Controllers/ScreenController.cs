@@ -8,24 +8,24 @@ using WebApi.Services;
 
 namespace WebApi.Controllers;
 
-[Route("/api/review")]
+[Route("/api/screen")]
 [ApiController]
-public class ReviewController : ControllerBase
+public class ScreenController : ControllerBase
 {
-    private readonly IReviewService _service;
+    private readonly IScreenService _service;
 
-    public ReviewController(IReviewService service)
+    public ScreenController(IScreenService service)
     {
         _service = service;
     }
 
     [HttpPost]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ReviewAddUpdateDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ScreenAddUpdateDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Add([FromBody] ReviewAddUpdateDto dtoEntity)
+    public async Task<IActionResult> Add([FromBody] ScreenAddUpdateDto dtoEntity)
     {
         try
         {
@@ -50,7 +50,7 @@ public class ReviewController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -73,16 +73,14 @@ public class ReviewController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(IEnumerable<ReviewListDto>), StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<ScreenListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAll([FromQuery] float rating)
+    public async Task<IActionResult> GetAll()
     {
         try
         {
-            return Ok(await _service.GetAll(rating));
+            return Ok(await _service.GetAll());
         }
         catch (ServiceException ex)
         {
@@ -95,10 +93,8 @@ public class ReviewController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ReviewGetDto), StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ScreenGetDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetById([FromRoute] int id)
     {
@@ -117,12 +113,12 @@ public class ReviewController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ReviewAddUpdateDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ScreenAddUpdateDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ReviewAddUpdateDto dtoEntity)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ScreenAddUpdateDto dtoEntity)
     {
         try
         {

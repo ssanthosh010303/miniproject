@@ -8,28 +8,26 @@ using WebApi.Repositories;
 
 namespace WebApi.Services;
 
-public interface IReviewService
+public interface IScreenService
 {
-    public Task<Review> Add(ReviewAddUpdateDto entity);
+    public Task<ScreenAddUpdateDto> Add(ScreenAddUpdateDto entity);
     public Task Delete(int id);
-    public Task<ICollection<ReviewListDto>> GetAll(float rating);
-    public Task<ReviewGetDto> GetById(int id);
-    public Task<Review> Update(int id, ReviewAddUpdateDto entity);
+    public Task<ICollection<ScreenListDto>> GetAll();
+    public Task<ScreenGetDto> GetById(int id);
+    public Task<Screen> Update(int id, ScreenAddUpdateDto entity);
 }
 
-public class ReviewService(IBaseRepository<Review> repository)
-    : IReviewService
+public class ScreenService(IBaseRepository<Screen> repository)
+    : IScreenService
 {
-    private readonly IBaseRepository<Review> _repository = repository;
+    private readonly IBaseRepository<Screen> _repository = repository;
 
-    public async Task<Review> Add(ReviewAddUpdateDto entity)
+    public async Task<ScreenAddUpdateDto> Add(ScreenAddUpdateDto entity)
     {
         try
         {
-            var review = entity.CopyTo(new Review());
-            review.MovieId = entity.MovieId;
-
-            return await _repository.Add(review);
+            await _repository.Add(entity.CopyTo(new Screen()));
+            return entity;
         }
         catch (RepositoryException ex)
         {
@@ -59,20 +57,13 @@ public class ReviewService(IBaseRepository<Review> repository)
         }
     }
 
-    public async Task<ICollection<ReviewListDto>> GetAll(float rating)
+    public async Task<ICollection<ScreenListDto>> GetAll()
     {
         try
         {
-            var queryableObj = _repository.GetDbSet()
-                .Select(entity => new ReviewListDto().CopyFrom(entity));
-
-            if (rating != 0)
-            {
-                queryableObj = queryableObj
-                    .Where(entity => entity.Rating == rating);
-            }
-
-            return await queryableObj.ToListAsync();
+            return await _repository.GetDbSet()
+                .Select(entity => new ScreenListDto().CopyFrom(entity))
+                .ToListAsync();
         }
         catch (RepositoryException ex)
         {
@@ -82,11 +73,14 @@ public class ReviewService(IBaseRepository<Review> repository)
         }
     }
 
-    public async Task<ReviewGetDto> GetById(int id)
+    public async Task<ScreenGetDto> GetById(int id)
     {
         try
         {
-            return new ReviewGetDto().CopyFrom(await _repository.GetById(id));
+            return new ScreenGetDto().CopyFrom(await _repository.GetDbSet()
+                .Where(entity => entity.Id == id)
+                .Include(entity => entity.Theater)
+                .FirstAsync());
         }
         catch (RepositoryException ex)
         {
@@ -101,7 +95,7 @@ public class ReviewService(IBaseRepository<Review> repository)
         }
     }
 
-    public async Task<Review> Update(int id, ReviewAddUpdateDto entity)
+    public async Task<Screen> Update(int id, ScreenAddUpdateDto entity)
     {
         try
         {

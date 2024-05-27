@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,23 +9,28 @@ using WebApi.Services;
 
 namespace WebApi.Controllers;
 
-[Route("/api/promo")]
+[Route("/api/payment")]
 [ApiController]
-public class PromoController(IPromoService service) : ControllerBase
+public class PaymentController : ControllerBase
 {
-    private readonly IPromoService _service = service;
+    private readonly IPaymentService _service;
+
+    public PaymentController(IPaymentService service)
+    {
+        _service = service;
+    }
 
     [HttpPost]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(PromoAddUpdateDto), StatusCodes.Status200OK)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+    [ProducesResponseType(typeof(PaymentAddDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Add([FromBody] PromoAddUpdateDto dtoEntity)
+    public async Task<IActionResult> Add([FromBody] PaymentAddDto dtoEntity)
     {
         try
         {
-            return Ok(await _service.Add(dtoEntity));
+            return Ok(await _service.AddPendingPayment(dtoEntity, User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            )?? throw new ServiceException("User not found.")));
         }
         catch (ServiceValidationException ex)
         {
@@ -45,9 +51,6 @@ public class PromoController(IPromoService service) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete([FromRoute] int id)
@@ -68,8 +71,7 @@ public class PromoController(IPromoService service) : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(IEnumerable<PromoListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<PaymentListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll()
     {
@@ -88,45 +90,13 @@ public class PromoController(IPromoService service) : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(PromoGetDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaymentGetDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetById([FromRoute] int id)
     {
         try
         {
             return Ok(await _service.GetById(id));
-        }
-        catch (ServiceException ex)
-        {
-            return BadRequest(new ErrorResponseDto
-            {
-                Message = ex.Message,
-                ErrorCode = "EntityNotFound"
-            });
-        }
-    }
-
-    [HttpPut("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(PromoAddUpdateDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Update(
-        [FromRoute] int id, [FromBody] PromoAddUpdateDto dtoEntity)
-    {
-        try
-        {
-            return Ok(await _service.Update(id, dtoEntity));
-        }
-        catch (ServiceValidationException ex)
-        {
-            return BadRequest(new ErrorResponseDto
-            {
-                Message = ex.Message,
-                ErrorCode = "ValidationFailed"
-            });
         }
         catch (ServiceException ex)
         {

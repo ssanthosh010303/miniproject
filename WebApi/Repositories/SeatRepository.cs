@@ -7,10 +7,10 @@ namespace WebApi.Repositories;
 public interface ISeatRepository
 {
     public DbSet<Seat> GetDbSet();
-    public Task<Seat> GetById(int theaterId, string seatId);
+    public Task<Seat> GetById(int theaterId, int screenId, string seatId);
     public Task<Seat> Add(Seat seat);
     public Task<Seat> Update(Seat seat);
-    public Task Delete(int theaterId, string seatId);
+    public Task Delete(int theaterId, int screenId, string seatId);
 }
 
 public class SeatRepository(ApplicationDbContext applicationDbContext)
@@ -23,10 +23,13 @@ public class SeatRepository(ApplicationDbContext applicationDbContext)
         return _applicationDbContext.Set<Seat>();
     }
 
-    public async Task<Seat> GetById(int theaterId, string seatId)
+    public async Task<Seat> GetById(int theaterId, int screenId, string seatId)
     {
-        return await _applicationDbContext.Seats.FindAsync(seatId, theaterId)
-            ?? throw new RepositoryException($"Seat with ID {seatId} is not found.");
+        return await GetDbSet()
+            .Where(entity => entity.TheaterId == theaterId &&
+                entity.ScreenId == screenId &&
+                entity.Id == seatId)
+            .FirstAsync();
     }
 
     public async Task<Seat> Add(Seat seat)
@@ -66,11 +69,12 @@ public class SeatRepository(ApplicationDbContext applicationDbContext)
         }
     }
 
-    public async Task Delete(int theaterId, string seatId)
+    public async Task Delete(int theaterId, int screenId, string seatId)
     {
         try
         {
-            _applicationDbContext.Seats.Remove(await GetById(theaterId, seatId));
+            _applicationDbContext.Seats.Remove(await GetById(
+                theaterId, screenId, seatId));
             await _applicationDbContext.SaveChangesAsync();
         }
         catch (DbUpdateException ex)

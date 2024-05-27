@@ -20,6 +20,9 @@ public class SeatSchemaAddUpdateDto : BaseAddUpdateDto
     public string RowRange { get; set; }
 
     [Required]
+    public int ScreenId { get; set; }
+
+    [Required]
     [Range(1, 100,
         ErrorMessage = "Number of columns should be between 1 and 100.")]
     public int NumberOfColumns { get; set; }
@@ -49,19 +52,22 @@ public class SeatGetDto : BaseDto
     }
 }
 
+public class SeatRequestDto : BaseDto
+{
+    public int TheaterId { get; set; }
+    public int ScreenId { get; set; }
+}
+
 public class SeatListDto : BaseDto
 {
     public string Id { get; set; }
 
     public string SeatType { get; set; }
 
-    public bool IsBooked { get; set; }
-
     public SeatListDto CopyFrom(Seat entity)
     {
         Id = entity.Id;
         SeatType = entity.SeatType.Name;
-        IsBooked = entity.IsBooked;
 
         return this;
     }

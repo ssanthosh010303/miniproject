@@ -61,6 +61,7 @@ public class MovieShowService(IBaseRepository<MovieShow> repository)
         try
         {
             return await _repository.GetDbSet()
+                .Where(entity => entity.ShowTime >= DateTime.Today)
                 .Include(entity => entity.Movie)
                 .Select(entity => new MovieShowListDto().CopyFrom(entity))
                 .ToListAsync();

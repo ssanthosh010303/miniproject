@@ -33,19 +33,15 @@ public class User : BaseModel
 
     [Required(ErrorMessage = "Membership is a required field.")]
     [EnumDataType(typeof(Membership))]
-    public Membership MemberType { get; set; }
+    public Membership MemberType { get; set; } = Membership.Basic;
 
     [Required(ErrorMessage = "Phone number is a required field.")]
     [Phone(ErrorMessage = "Invalid phone number format provided.")]
     public string Phone { get; set; }
 
-    public int RoleId { get; set; }
-    public UserRole Role { get; set; }
-}
+    [Required(ErrorMessage = "Role is a required field.")]
+    [MaxLength(128, ErrorMessage = "Role cannot be more than 128 characters.")]
+    public string Role { get; set; }
 
-public class UserRole : BaseModel
-{
-    [MaxLength(16,
-        ErrorMessage = "Role name cannot be more than 16 characters.")]
-    public string Name { get; set; }
+    public string Illustration { get; set; }
 }

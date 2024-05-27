@@ -32,7 +32,7 @@ public class TicketAddUpdateDto : BaseAddUpdateDto
     public int PaymentId { get; set; }
 
     [Required(ErrorMessage = "Screen number is a required field.")]
-    public int ScreenNumber { get; set; }
+    public int ScreenId { get; set; }
 
     [Required(ErrorMessage = "Booked seats is a required field.")]
     [RegularExpression(@"^[A-Za-z]\d{2}(,[A-Za-z]\d{2})*$",
@@ -45,9 +45,8 @@ public class TicketAddUpdateDto : BaseAddUpdateDto
 
     public Ticket CopyTo(Ticket entity)
     {
-        entity.ScreenNumber = ScreenNumber;
+        entity.ScreenId = ScreenId;
         entity.SeatsBooked = SeatsBooked;
-        entity.TotalPrice = TotalPrice;
 
         entity.UserId = UserId;
         entity.MovieShowId = MovieShowId;

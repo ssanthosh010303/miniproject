@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using WebApi.Exceptions;
@@ -18,6 +20,9 @@ public class MovieController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Add([FromBody] MovieAddUpdateDto dtoEntity)
@@ -44,26 +49,10 @@ public class MovieController : ControllerBase
         }
     }
 
-    [HttpPost("{id}/cast")]
-    [ProducesResponseType(typeof(MovieAddRemoveCastMembersDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AddCast([FromRoute] int id, [FromBody] MovieAddRemoveCastMembersDto movieAddCastDto)
-    {
-        try
-        {
-            return Ok(await _service.AddCast(id, movieAddCastDto));
-        }
-        catch (ServiceException ex)
-        {
-            return BadRequest(new ErrorResponseDto
-            {
-                Message = ex.Message,
-                ErrorCode = "EntityNotFoundOrExists"
-            });
-        }
-    }
-
     [HttpDelete("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete([FromRoute] int id)
@@ -84,6 +73,7 @@ public class MovieController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<MovieListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll()
@@ -103,6 +93,7 @@ public class MovieController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(MovieGetDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetById([FromRoute] int id)
@@ -121,26 +112,10 @@ public class MovieController : ControllerBase
         }
     }
 
-    [HttpDelete("{id}/cast")]
-    [ProducesResponseType(typeof(MovieAddRemoveCastMembersDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RemoveCast([FromRoute] int id, [FromBody] MovieAddRemoveCastMembersDto movieAddCastDto)
-    {
-        try
-        {
-            return Ok(await _service.RemoveCast(id, movieAddCastDto));
-        }
-        catch (ServiceException ex)
-        {
-            return BadRequest(new ErrorResponseDto
-            {
-                Message = ex.Message,
-                ErrorCode = "EntityNotFound"
-            });
-        }
-    }
-
     [HttpPut("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(MovieAddUpdateDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] MovieAddUpdateDto dtoEntity)

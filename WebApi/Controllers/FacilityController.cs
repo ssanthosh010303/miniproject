@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using WebApi.Exceptions;
@@ -18,6 +20,9 @@ public class FacilityController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Add([FromBody] FacilityAddUpdateDto dtoEntity)
@@ -45,6 +50,9 @@ public class FacilityController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete([FromRoute] int id)
@@ -65,6 +73,7 @@ public class FacilityController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<FacilityListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll()
@@ -84,6 +93,7 @@ public class FacilityController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(FacilityGetDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetById([FromRoute] int id)
@@ -103,6 +113,9 @@ public class FacilityController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(FacilityAddUpdateDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] FacilityAddUpdateDto dtoEntity)

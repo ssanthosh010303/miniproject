@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Models;
 
-[PrimaryKey(nameof(Id), nameof(TheaterId))]
+[PrimaryKey(nameof(Id), nameof(TheaterId), nameof(ScreenId))]
 public class Seat
 {
     [MaxLength(3, ErrorMessage = "Seat ID cannot be more than 3 characters.")]
@@ -17,10 +17,15 @@ public class Seat
     public int TheaterId { get; set; }
     public Theater Theater { get; set; }
 
+    public int ScreenId { get; set; }
+    public Screen Screen { get; set; }
+
     public int SeatTypeId { get; set; }
     public SeatType SeatType { get; set; }
 
-    public bool IsBooked { get; set; } = false;
+    [ForeignKey("BookedForShow")]
+    public int? ShowId { get; set; }
+    public MovieShow BookedForShow { get; set; }
 
     public bool IsActive { get; set; } = false;
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;

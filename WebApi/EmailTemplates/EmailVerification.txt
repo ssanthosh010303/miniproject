@@ -1,0 +1,9 @@
+Email Verification and Account Activation - Movie Booking System API
+
+Hello Dear Customer,
+    You're receiving this email as a part of the account activation process. To activate your account, please verify your email ID by clicking the link below:
+
+Email Activation Link: %s
+
+Regards,
+Movie Booking System API

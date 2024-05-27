@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using WebApi.Exceptions;
@@ -7,6 +9,7 @@ using WebApi.Services;
 namespace WebApi.Controllers;
 
 [Route("/api/seat")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [ApiController]
 public class SeatController : ControllerBase
 {
@@ -18,6 +21,9 @@ public class SeatController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(SeatAddUpdateDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Add([FromBody] SeatAddUpdateDto dtoEntity)
@@ -44,14 +50,18 @@ public class SeatController : ControllerBase
         }
     }
 
-    [HttpDelete("{sid}/{tid}")]
+    [HttpDelete("{sid}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Delete([FromRoute] string sid, [FromRoute] int tid)
+    public async Task<IActionResult> Delete(
+        [FromRoute] string sid, [FromBody] SeatRequestDto dtoEntity)
     {
         try
         {
-            await _service.Delete(tid, sid);
+            await _service.Delete(dtoEntity.TheaterId, dtoEntity.ScreenId, sid);
             return NoContent();
         }
         catch (ServiceException ex)
@@ -65,13 +75,14 @@ public class SeatController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<SeatListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int tid, [FromQuery] int scid)
     {
         try
         {
-            return Ok(await _service.GetAll());
+            return Ok(await _service.GetAll(tid, scid));
         }
         catch (ServiceException ex)
         {
@@ -83,14 +94,17 @@ public class SeatController : ControllerBase
         }
     }
 
-    [HttpGet("{sid}/{tid}")]
+    [HttpGet("{sid}")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(SeatGetDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetById([FromRoute] string sid, [FromRoute] int tid)
+    public async Task<IActionResult> GetById(
+        [FromRoute] string sid, [FromQuery] int tid, [FromQuery] int scid)
     {
         try
         {
-            return Ok(await _service.GetById(tid, sid));
+            return Ok(await _service.GetById(
+                tid, scid, sid));
         }
         catch (ServiceException ex)
         {

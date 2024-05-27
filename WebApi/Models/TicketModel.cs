@@ -15,13 +15,14 @@ public class Ticket : BaseModel
     public int PaymentId { get; set; }
     public Payment Payment { get; set; }
 
+    [Required(ErrorMessage = "Theater ID is a required field.")]
+    public int TheaterId { get; set; }
+    public Theater Theater { get; set; }
+
     [Required(ErrorMessage = "Screen number is a required field.")]
-    public int ScreenNumber { get; set; }
+    public int ScreenId { get; set; }
+    public Screen Screen { get; set; }
 
     [Required(ErrorMessage = "Booked seats is a required field.")]
     public string SeatsBooked { get; set; }
-
-    [Required(ErrorMessage = "Total price is a required field.")]
-    [Range(0, 10000.0, ErrorMessage = "Total price must be between 0 and 10000.")]
-    public decimal TotalPrice { get; set; }
 }
