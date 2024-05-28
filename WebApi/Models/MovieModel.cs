@@ -26,7 +26,8 @@ public enum MovieGenre
     Musical,
     Sport,
     War,
-    Other
+    Other,
+    All
 }
 
 public class Movie : BaseModel

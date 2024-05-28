@@ -15,7 +15,7 @@ public interface IMovieService
         int id, MovieAddRemoveCastMembersDto movieAddCastDto);
     public Task<MovieAddRemoveCastMembersDto> RemoveCast(int id, MovieAddRemoveCastMembersDto movieAddCastDto);
     public Task Delete(int id);
-    public Task<ICollection<MovieListDto>> GetAll();
+    public Task<ICollection<MovieListDto>> GetAll(MovieGenre genre);
     public Task<MovieGetDto> GetById(int id);
     public Task<Movie> Update(int id, MovieAddUpdateDto entity);
 }
@@ -124,10 +124,18 @@ public class MovieService(
         }
     }
 
-    public async Task<ICollection<MovieListDto>> GetAll()
+    public async Task<ICollection<MovieListDto>> GetAll(MovieGenre genre)
     {
         try
         {
+            if (genre != MovieGenre.All)
+            {
+                return await _repository.GetDbSet()
+                    .Where(entity => entity.Genre == genre)
+                    .Select(entity => new MovieListDto().CopyFrom(entity))
+                    .ToListAsync();
+            }
+
             return await _repository.GetDbSet()
                 .Select(entity => new MovieListDto().CopyFrom(entity))
                 .ToListAsync();

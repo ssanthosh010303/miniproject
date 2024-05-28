@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using WebApi.Exceptions;
+using WebApi.Models;
 using WebApi.Models.DataTransferObjects;
 using WebApi.Services;
 
@@ -76,11 +77,11 @@ public class MovieController : ControllerBase
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<MovieListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] MovieGenre genre)
     {
         try
         {
-            return Ok(await _service.GetAll());
+            return Ok(await _service.GetAll(genre));
         }
         catch (ServiceException ex)
         {
