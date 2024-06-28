@@ -1,0 +1,17 @@
+{
+    "ConnectionStrings": {
+        "Development": "Server=;Port=3306;User ID=;Password=;Database="
+    },
+    "Jwt": {
+        "SecretKey": "",
+        "Issuer": "api.thembs.com",
+        "Audience": "api.thembs.com"
+    },
+    "EmailSettings": {
+        "SenderEmail": "",
+        "SenderPassword": "",
+        "SmtpServer": "smtp.gmail.com",
+        "SmtpPort": 587
+    },
+    "AllowedHosts": "*"
+}

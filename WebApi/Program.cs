@@ -133,6 +133,11 @@ public class Program
             options.AddPolicy("PaymentGateway", policy => policy.RequireRole("PaymentGateway"));
         });
 
+        builder.Services.AddCors(opts =>
+        {
+            opts.AddPolicy("AllowAll", builder => { builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin(); });
+        });
+
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -144,6 +149,8 @@ public class Program
             });
         }
 
+        app.UseCors("AllowAll");
+        app.UseAuthorization();
         app.UseHttpsRedirection();
         app.MapControllers();
         app.Run();

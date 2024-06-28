@@ -6,7 +6,7 @@ namespace WebApi.Email;
 
 public abstract class EmailTemplate
 {
-    protected const string baseUrl = "http://4.240.98.131:5064/api";
+    protected const string baseUrl = "http://localhost:8000/pages";
     protected const string templateEndsWith = "\n\nWith Regards,\nThe Movie Booking Team";
 
     public string Subject { get; protected set; } = string.Empty;
@@ -18,7 +18,7 @@ public class WelcomeEmailTemplate : EmailTemplate
     public WelcomeEmailTemplate(string recipientName, string verificationJwt)
     {
         Subject = "Welcome to the Movie Booking System";
-        Body = $"Hello {recipientName},\n    We welcome you to our movie booking platform. Before using our platform, we'd like you to verify your email by clicking the link below. The link is only valid for 1 hour. Thank you for your cooperation.\n\nEmail Verification Link: {baseUrl}/user/activate/{verificationJwt}{templateEndsWith}";
+        Body = $"Hello {recipientName},\n    We welcome you to our movie booking platform. Before using our platform, we'd like you to verify your email by clicking the link below. The link is only valid for 1 hour. Thank you for your cooperation.\n\nEmail Verification Link: {baseUrl}/email/verification.html?token={verificationJwt}{templateEndsWith}";
     }
 }
 
@@ -45,7 +45,7 @@ public class EmailIdUpdateConfirmationEmailTemplate : EmailTemplate
     public EmailIdUpdateConfirmationEmailTemplate(string recipientName, string token)
     {
         Subject = "Your Email Update Request";
-        Body = $"Hello {recipientName},\n    Your email update request is pending. You need to verify your new email address by clicking the link below. The link is only valid for one hour.\n\nEmail Verification Link: {baseUrl}/user/update-email/{token}{templateEndsWith}";
+        Body = $"Hello {recipientName},\n    Your email update request is pending. You need to verify your new email address by clicking the link below. The link is only valid for one hour.\n\nEmail Verification Link: {baseUrl}/email/update.html?token={token}{templateEndsWith}";
     }
 }
 

@@ -94,11 +94,13 @@ public class CastGetMovieListDto : BaseDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    public string Illustration { get; set; }
 
     public CastGetMovieListDto CopyFrom(Movie entity)
     {
         Id = entity.Id;
         Name = entity.Name;
+        Illustration = entity.Illustration;
 
         return this;
     }

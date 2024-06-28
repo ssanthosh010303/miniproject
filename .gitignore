@@ -4,4 +4,4 @@ bin/
 venv/
 
 *.sln
-appsettings.*
+appsettings.json

@@ -11,11 +11,13 @@ namespace WebApi.Models.DataTransferObjects;
 public class MovieListDto : BaseListDto
 {
     public string Name { get; set; }
+    public string Illustration { get; set; }
 
     public MovieListDto CopyFrom(Movie entity)
     {
         Id = entity.Id;
         Name = entity.Name;
+        Illustration = entity.Illustration;
 
         return this; // XXX
     }
@@ -135,12 +137,12 @@ public class MovieGetDto : BaseGetDto
             );
         }
 
-        foreach (var review in entity.Reviews)
-        {
-            Reviews.Add(
-                new MovieGetReviewListDto().CopyFrom(review)
-            );
-        }
+        // foreach (var review in entity.Reviews)
+        // {
+        //     Reviews.Add(
+        //         new MovieGetReviewListDto().CopyFrom(review)
+        //     );
+        // }
 
         return this;
     }
@@ -155,11 +157,13 @@ public class MovieGetCastListDto : BaseDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    public string Illustration { get; set; }
 
     public MovieGetCastListDto CopyFrom(Cast entity)
     {
         Id = entity.Id;
         Name = entity.Name;
+        Illustration = entity.Illustration;
 
         return this;
     }
